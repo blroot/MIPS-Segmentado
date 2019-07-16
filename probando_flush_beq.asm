@@ -1,5 +1,5 @@
-# Como se resuelven los saltos incondicionales en Ex y los condicionales en Mem
-# se prueba que si tenemos una instrucción beq seguida por una j, beq tiene prioridad
+# En este programa se prueba que el flush funcione correctamente luego de una instrucción beq
+# resultado esperado => $t1=$t2=1; $t3=2;
 
 # Usamos los mismos datos de program.s por simplicidad
 .data 
@@ -23,8 +23,12 @@ main:
   lw $t2, 0($zero) # lw $r10, 0($r0)
   # este debe saltar primero
   beq $t1, $t2, condicional
-  # Sin flush del pipeline este nop produce un resultado anómalo
-  nop
+  # Sin flush del pipeline esta instruccion se ejecuta
+  lw $t5, 12($zero) # lw $r13, 12($r0)
+  # Sin flush del pipeline esta instruccion se ejecuta
+  lw $t6, 12($zero) # lw $r14, 12($r0)
+  # Sin flush del pipeline esta instruccion se ejecuta
+  lw $t7, 12($zero) # lw $r15, 12($r0)
   # este salto nunca ocurre
   j incondicional
   
@@ -33,7 +37,7 @@ condicional:
   j fin
 
 incondicional:
-  lw $t4, 8($zero) # lw $r11, 8($r0)
+  lw $t4, 8($zero) # lw $r12, 8($r0)
   
 fin:
   nop

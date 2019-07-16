@@ -45,7 +45,7 @@ component registers
            
 end component;
 
---DECLARACION DE SEÑALES--
+--DECLARACION DE SEÃ‘ALES--
       --ETAPA IF--
 signal PC: std_logic_vector (31 downto 0);
 signal PC_4: std_logic_vector (31 downto 0);
@@ -157,7 +157,7 @@ begin
       ID_Instruction <= (others => '0');
     elsif rising_edge(clk) then
       -- Se hace flush del pipeline en saltos
-      if (Branch = '1' or Jump = '1') then
+      if (PcSrc = '1' or Jump = '1') then
         ID_PC_4 <= (others => '0');
         ID_Instruction <= (others => '0');
       else
@@ -327,7 +327,7 @@ ID_EX: process(clk, reset)
       EX_rd <= (others => '0');
     elsif( rising_edge (clk)) then
       -- Se hace flush del pipeline en saltos
-      if (Branch = '1' or Jump = '1') then
+      if (PcSrc = '1' or Jump = '1') then
         EX_data1_rd <= (others =>'0');
         EX_data2_rd <= (others =>'0');
         EX_RegWrite <= '0' ;
@@ -415,13 +415,13 @@ ALU_B_In <= EX_data2_rd when ALUSrc = '0' else EX_immediate;
 -- MUX RegDst
 EX_Instruction_RegDst <= EX_rt when RegDst  = '0' else EX_rd; 
 
--- Calculo direcci�n de salto (Jump)
+-- Calculo dirección de salto (Jump)
 EX_PC_Jump <= EX_PC_4(31 downto 28)&EX_immediate(25 downto 0)&"00";
 
 -- Control de Jump
 Jump <= EX_Jump;
 
--- Calculo de dirección de satB(branch)
+-- Calculo de direcciÃ³n de satB(branch)
 EX_PC_Branch <= (EX_PC_4)+(EX_immediate(29 downto 0)&"00");
 
 ---------------------------------------------------------------------------------------------------------------
@@ -442,7 +442,7 @@ EX_MEM: process(clk, reset)
       MEM_PC_Branch <= (others => '0');
      elsif( rising_edge (clk)) then
       -- Se hace flush del pipeline en saltos condicionales
-      if (Branch = '1') then
+      if (PcSrc = '1') then
         MEM_RegWrite <= '0';
         MEM_MemToReg <= '0';
         MEM_MemRead <= '0';

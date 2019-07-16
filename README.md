@@ -32,4 +32,176 @@ Se pide que al diseño completo del procesador MIPS segmentado realizado por la 
 incorporar las siguientes instrucciones y verificar el diseño utilizando el archivo “program1”
 proporcionado por la cátedra.
 
-![Instrucciones a implementar](./img_ejercicio.jpg)
+### Instrucciones a implementar
+<p align="center">
+  <img src="./img_ejercicio.jpg" align="center" width="500" height="500">
+</p>
+
+## Resolución
+
+### Agregado de Inmediatos
+
+Para el agregado de las instrucciones LUI, ADDI, AND y ORI, se realizaron cambios sobre
+- processor.vhd
+  - Se aumento la dimension de la señal de control de la ALU de 2 a 3 bits, para soportar los inmediatos nuevos.
+```vhdl
+signal ALUOp: std_logic_vector(2 downto 0);
+```
+  - Se definieron en la etapa ID, las señales de control para las operaciones según fue necesario
+```vhdl
+      --LUI--
+      when "001111" =>
+		ID_RegWrite<= '1'; 
+		ID_MemToReg<= '0'; 
+		ID_MemRead<= '0'; 
+		ID_MemWrite<= '0'; 
+		ID_Branch<= '0'; 
+		ID_RegDst<= '0'; 
+		ID_AluOp<= "100"; 
+		ID_ALUSrc<= '1';
+      --ADDI--
+      when "001000" =>
+		ID_RegWrite<= '1'; 
+		ID_MemToReg<= '0'; 
+		ID_MemRead<= '0'; 
+		ID_MemWrite<= '0'; 
+		ID_Branch<= '0';
+		ID_RegDst<= '0'; 
+		ID_AluOp<= "101"; 
+		ID_ALUSrc<= '1';
+      --ANDI--
+      when "001100" =>
+		ID_RegWrite<= '1'; 
+		ID_MemToReg<= '0'; 
+		ID_MemRead<= '0'; 
+		ID_MemWrite<= '0'; 
+		ID_Branch<= '0'; 
+		ID_RegDst<= '0'; 
+		ID_AluOp<= "110"; 
+		ID_ALUSrc<= '1';
+      --ORI--
+      when "001101" =>
+		ID_RegWrite<= '1'; 
+		ID_MemToReg<= '0'; 
+		ID_MemRead<= '0'; 
+		ID_MemWrite<= '0'; 
+		ID_Branch<= '0'; 
+		ID_RegDst<= '0'; 
+		ID_AluOp<= "111"; 
+		ID_ALUSrc<= '1';
+```
+  - Se definieron en la etapa EX los casos anteriores en la unidad de control para la ALU
+```vhdl
+      when "100" => -- LUI
+	  AluControl <= "100";
+      when "101" => -- ADDI
+	  AluControl <= "010";
+      when "110" => -- ANDI
+	  AluControl <= "000";
+      when "111" => -- ORI
+	  AluControl <= "001";
+```
+- alu.vhd
+  - En la ALU se adecuó la operación para LUI y luego se redefinieron los valores del case en 3 bits
+```vhdl
+process(a, b, control)
+begin
+    case control is
+    when "000" => aux <= a and b;
+    when "001" => aux <= a or b;
+    when "010" => aux <= a + b;
+    when "110" => aux <= a - b;
+    when "111" => 
+        if(a<b) then
+        aux <= x"00000001";
+        else aux <= x"00000000";
+        end if;
+    when "100" => aux <= b(15 downto 0) & x"0000";  
+    when others => aux <= x"00000000";   
+    end case;  
+       
+end process;
+```
+
+### Agregado de Jump
+
+Para el agregado de la J, se realizaron cambios sobre processor.vhd
+- En primer lugar se creo la señal de Jump y las señales que resguardan el cálculo del salto
+```vhdl
+-- Control de mux jump
+signal Jump: std_logic;
+
+ --ETAPA ID--
+signal ID_Jump: std_logic;
+
+ --ETAPA EX--
+signal EX_Jump: std_logic;
+-- Para direccion de salto en jump
+signal EX_PC_Jump: std_logic_vector (31 downto 0);
+```
+
+  - En la etapa ID se agrega el seteo de la señal de control del jump en CONTROL_UNIT según corresponda
+```vhdl
+ID_Jump <= '1';
+```
+o
+```vhdl
+ID_Jump <= '0';
+```
+  - Además se propaga la señal de control
+```vhdl
+EX_Jump <= ID_Jump;
+```
+- A continuación en la etapa EX, se realiza el cálculo del salto para el J y se propaga la señal
+
+```vhdl
+-- Calculo dirección de salto (Jump)
+EX_PC_Jump <= EX_PC_4(31 downto 28)&EX_immediate(25 downto 0)&"00";
+-- Control de Jump
+Jump <= EX_Jump;
+```
+
+  - Por ultimo, en la etapa IF, se aplica nueva lógica para decidir como cargar el PC según como se hayan cargado las señales antes mencionadas
+```vhdl
+  next_PC <= MEM_PC_Branch when (PcSrc = '1') else
+		EX_PC_jump when ((PcSrc = '0') and (Jump = '1')) else
+		PC_4;
+```
+
+## Flush del datapath ante saltos
+
+Para complementar lo visto en clase, optamos por agregar el flush de las etapas que correspondan.
+El diseño del MIP trabaja sin predicción de salto, o tambien podriamos decir, que realiza predicción no efectiva (nunca salta).
+De esta manera, cuando realmente se efectua un salto, es necesario limpiar las etapas mal cargadas.
+Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a saber:
+
+  - La existencia de un BEQ se conoce en la etapa ID sobre la señal ID_Branch y la misma se propaga hasta la etapa MEM en 
+  la señal Branch, ya que recien en la etapa EX se confirma la efectividad del salto. 
+  Luego, en caso positivo, se limpian las etapas IF-ID-EX para poder cargar el PC correcto a donde apunta el salto.
+
+  - Luego para el caso del J, se conoce tambien en la etapa ID la señal ID_Jump, la misma se propaga hasta EX en 
+  donde se carga finalmente la señal Jump. Luego al avanzar un ciclo, estando el J en etapa MEM, se deben limpiar la etapas IF-ID-EX
+ 
+```vhdl
+-- REGISTRO DE SEGMENTACION IF/ID      
+      if (Branch = '1' or Jump = '1') then
+        ID_PC_4 <= (others => '0');
+        ID_Instruction <= (others => '0');
+        
+-- REGISTRO DE SEGMENTACION ID/EX
+      if (Branch = '1' or Jump = '1') then
+        EX_data1_rd <= (others =>'0');
+        EX_data2_rd <= (others =>'0');
+        EX_RegWrite <= '0' ;
+        EX_MemToReg <= '0' ; 
+        EX_MemRead <=  '0' ;
+        EX_MemWrite <=  '0' ;
+        EX_Branch <=  '0' ;
+        EX_Jump <=  '0' ;
+        RegDst <=  '0' ;
+        ALUOp <= (others =>'0');
+        ALUSrc <= '0' ;
+        EX_immediate <= (others => '0');
+        EX_rt <= (others => '0');
+        EX_rd <= (others => '0');
+``

@@ -173,25 +173,28 @@ Jump <= EX_Jump;
 ```
 
   - Por ultimo, en la etapa IF, se aplica nueva lógica para decidir como cargar el PC según como se hayan cargado las señales antes mencionadas
+
 ```vhdl
   next_PC <= MEM_PC_Branch when (PcSrc = '1') else
 		EX_PC_jump when ((PcSrc = '0') and (Jump = '1')) else
 		PC_4;
 ```
+Mediante esta lógica podemos tener una instrucción BEQ y a continuación una J en memoria de instrucciones y el funcionamiento va a ser el esperado (no se necesitan NOP)
+
 
 ## Flush del datapath ante saltos
 
-Para complementar lo visto en clase, optamos por agregar el flush de las etapas que correspondan.
-El diseño del MIP trabaja sin predicción de salto, o tambien podriamos decir, que realiza predicción no efectiva (nunca salta).
-De esta manera, cuando realmente se efectua un salto, es necesario limpiar las etapas mal cargadas.
+Para complementar lo visto en clase y por una cuestión de consistencia con la lógica anterior, optamos por agregar el flush de las etapas que corresponden.
+El diseño de este procesador MIPS trabaja sin predicción de saltos, o tambien podriamos decir que realiza predicción no efectiva (se asume que el salto no es efectivo).
+De esta manera, cuando realmente se efectua un salto, es necesario limpiar las etapas que contienen instrucciones mal cargadas.
 Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a saber:
 
   - La existencia de un BEQ se conoce en la etapa ID sobre la señal ID_Branch y la misma se propaga hasta la etapa MEM en 
-  la señal Branch, ya que recien en la etapa EX se confirma la efectividad del salto. 
-  Luego, en caso positivo, se limpian las etapas IF-ID-EX para poder cargar el PC correcto a donde apunta el salto.
+  la señal Branch, ya que recién en la etapa EX se confirma la efectividad del salto. 
+  Luego, en caso positivo, se limpian los registros IF/ID-ID/EX-EX/MEM para poder cargar el PC correcto a donde apunta el salto.
 
   - Luego para el caso del J, se conoce tambien en la etapa ID la señal ID_Jump, la misma se propaga hasta EX en 
-  donde se carga finalmente la señal Jump. Luego al avanzar un ciclo, estando el J en etapa MEM, se deben limpiar la etapas IF-ID-EX
+  donde se carga finalmente la señal Jump. Luego al avanzar un ciclo, estando el J en etapa MEM, se deben limpiar los registros IF/ID-ID/EX-
  
 ```vhdl
 -- REGISTRO DE SEGMENTACION IF/ID      
@@ -215,4 +218,16 @@ Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a sab
         EX_immediate <= (others => '0');
         EX_rt <= (others => '0');
         EX_rd <= (others => '0');
+ -- REGISTRO DE SEGMENTACION EX/MEM
+ if (Branch = '1') then
+        MEM_RegWrite <= '0';
+        MEM_MemToReg <= '0';
+        MEM_MemRead <= '0';
+        MEM_MemWrite <= '0';
+	Branch <= '0';
+        MEM_Zero <= '0';
+        MEM_AluResult <= (others => '0');
+        MEM_data2_rd <= (others => '0');
+        MEM_Instruction_RegDst <= (others => '0');
+	MEM_PC_Branch <= (others => '0');
 ``

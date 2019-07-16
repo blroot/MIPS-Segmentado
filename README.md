@@ -1,13 +1,13 @@
 # Práctica de Laboratorio: Microprocesador MIPS Segmentado
 
 - Trabajo Práctico
-- Arquitectura del Computador I 
+- Arquitectura de Computadoras I 
 - Universidad Nacional de Tres de Febrero
 
 ## Integrantes
 
 - Chavez, Matias. Legajo N° 41902
-- Lottero, Bruno. Legajo N° XXXXX
+- Lottero, Bruno. Legajo N° 18434
 
 ## Objetivo
 

@@ -219,7 +219,7 @@ Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a sab
         EX_rt <= (others => '0');
         EX_rd <= (others => '0');
  -- REGISTRO DE SEGMENTACION EX/MEM
- if (Branch = '1') then
+      if (Branch = '1') then
         MEM_RegWrite <= '0';
         MEM_MemToReg <= '0';
         MEM_MemRead <= '0';

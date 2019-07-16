@@ -89,6 +89,17 @@ signal ALUOp: std_logic_vector(2 downto 0);
 		ID_RegDst<= '0'; 
 		ID_AluOp<= "111"; 
 		ID_ALUSrc<= '1';
+      --J--
+      when "000010" =>
+		ID_RegWrite<= '1'; 
+		ID_MemToReg<= '0'; 
+		ID_MemRead<= '0'; 
+		ID_MemWrite<= '0'; 
+		ID_Branch<= '0'; 
+		ID_Jump <= '1';
+		ID_RegDst<= '0'; 
+		ID_AluOp<= "011"; --alu va por others 
+		ID_ALUSrc<= '1';
 ```
   - Se definieron en la etapa EX los casos anteriores en la unidad de control para la ALU
 ```vhdl

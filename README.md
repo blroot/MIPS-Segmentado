@@ -179,7 +179,8 @@ Jump <= EX_Jump;
 		EX_PC_jump when ((PcSrc = '0') and (Jump = '1')) else
 		PC_4;
 ```
-Mediante esta lógica podemos tener una instrucción BEQ y a continuación una J en memoria de instrucciones y el funcionamiento va a ser el esperado (no se necesitan NOP)
+
+Mediante esta lógica podemos tener una instrucción BEQ y a continuación una J en memoria de instrucciones y el funcionamiento va a ser el esperado (no se necesitan NOP) se escribió el programa **probando_beq_j.s** para comprobar dicho funcionamiento.
 
 
 ## Flush del datapath ante saltos
@@ -195,6 +196,11 @@ Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a sab
 
   - Luego para el caso del J, se conoce tambien en la etapa ID la señal ID_Jump, la misma se propaga hasta EX en 
   donde se carga finalmente la señal Jump. Luego al avanzar un ciclo, estando el J en etapa MEM, se deben limpiar los registros IF/ID-ID/EX-
+  
+  - Para probar el funcionamiento, se escribieron los programas adicionales de prueba: 
+  	- **probando_flush_beq.s**
+	- **probando_flush_j.s**
+	- También es válido para probar esto el programa **Program1.s** provisto originalmente
  
 ```vhdl
 -- REGISTRO DE SEGMENTACION IF/ID      
@@ -230,4 +236,4 @@ Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a sab
         MEM_data2_rd <= (others => '0');
         MEM_Instruction_RegDst <= (others => '0');
 	MEM_PC_Branch <= (others => '0');
-``
+```

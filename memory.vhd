@@ -14,7 +14,7 @@ use IEEE.std_logic_textio.all;
 
 entity memory is
     generic(
-        C_ELF_FILENAME    : string := "C:\Users\edmundo\Documents\mips_segmentado\programa";
+        C_ELF_FILENAME    : string := "programa";
         C_MEM_SIZE        : integer := 1024
 	 );
     Port ( Addr : in std_logic_vector(31 downto 0);

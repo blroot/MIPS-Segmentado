@@ -105,7 +105,7 @@ begin
 
 	Instruction_Mem_inst : memory
 	generic map (
-	   C_ELF_FILENAME     => "C:\Users\edmundo\Documents\mips_segmentado\programa",
+	   C_ELF_FILENAME     => "programa",
       C_MEM_SIZE         => 1024
    )
 	port map (
@@ -119,7 +119,7 @@ begin
 	
 	Data_Mem_inst : memory
 	generic map (
-	   C_ELF_FILENAME     => "C:\Users\edmundo\Documents\mips_segmentado\data",
+	   C_ELF_FILENAME     => "data",
      C_MEM_SIZE         => 1024
    )	
 	port map(

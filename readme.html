@@ -42,7 +42,7 @@ obligatorio.</p>
 incorporar las siguientes instrucciones y verificar el diseño utilizando el archivo “program1”<br>
 proporcionado por la cátedra.</p>
 <h3 id="instrucciones-a-implementar">Instrucciones a implementar</h3>
-<p><img src="https://lh3.googleusercontent.com/EEGgcWAFb6WG8jKFm5pqYijzeNYiSg_oJNR5alGOhb7TpFOt_numsUS6EcLkER6Du4cxxUSb3a-9" alt="enter image description here"></p>
+<p><img src="https://lh3.googleusercontent.com/CMRw-8jg3Kf60NTHoPRqVc3T1nG453drIFOTJ5hhULPmuRqcCpiG4jj9Cw8kwv7mkbXhDRN5gVrO" alt="enter image description here"></p>
 <h2 id="resolución">Resolución</h2>
 <h3 id="agregado-de-inmediatos">Agregado de Inmediatos</h3>
 <p>Para el agregado de las instrucciones LUI, ADDI, AND y ORI, se realizaron cambios sobre</p>
@@ -191,7 +191,7 @@ Jump <span class="token operator">&lt;=</span> EX_Jump<span class="token punctua
 		EX_PC_jump <span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>PcSrc <span class="token operator">=</span> <span class="token number">'0'</span><span class="token punctuation">)</span> <span class="token operator">and</span> <span class="token punctuation">(</span>Jump <span class="token operator">=</span> <span class="token number">'1'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">else</span>
 		PC_4<span class="token punctuation">;</span>
 </code></pre>
-<p>Mediante esta lógica podemos tener una instrucción BEQ y a continuación una J en memoria de instrucciones y el funcionamiento va a ser el esperado (no se necesitan NOP)</p>
+<p>Mediante esta lógica podemos tener una instrucción BEQ y a continuación una J en memoria de instrucciones y el funcionamiento va a ser el esperado (no se necesitan NOP) se escribió el programa <strong>probando_beq_j.s</strong> para comprobar dicho funcionamiento.</p>
 <h2 id="flush-del-datapath-ante-saltos">Flush del datapath ante saltos</h2>
 <p>Para complementar lo visto en clase y por una cuestión de consistencia con la lógica anterior, optamos por agregar el flush de las etapas que corresponden.<br>
 El diseño de este procesador MIPS trabaja sin predicción de saltos, o tambien podriamos decir que realiza predicción no efectiva (se asume que el salto no es efectivo).<br>
@@ -206,6 +206,14 @@ Luego, en caso positivo, se limpian los registros IF/ID-ID/EX-EX/MEM para poder 
 <li>
 <p>Luego para el caso del J, se conoce tambien en la etapa ID la señal ID_Jump, la misma se propaga hasta EX en<br>
 donde se carga finalmente la señal Jump. Luego al avanzar un ciclo, estando el J en etapa MEM, se deben limpiar los registros IF/ID-ID/EX-</p>
+</li>
+<li>
+<p>Para probar el funcionamiento, se escribieron los programas adicionales de prueba:</p>
+<ul>
+<li><strong>probando_flush_beq.s</strong></li>
+<li><strong>probando_flush_j.s</strong></li>
+<li>También es válido para probar esto el programa <strong>Program1.s</strong> provisto originalmente</li>
+</ul>
 </li>
 </ul>
 <pre class=" language-vhdl"><code class="prism  language-vhdl"><span class="token comment">-- REGISTRO DE SEGMENTACION IF/ID      </span>

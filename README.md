@@ -236,4 +236,4 @@ Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a sab
         MEM_data2_rd <= (others => '0');
         MEM_Instruction_RegDst <= (others => '0');
 	MEM_PC_Branch <= (others => '0');
-``
+```

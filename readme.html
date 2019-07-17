@@ -1,0 +1,250 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>readme</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="práctica-de-laboratorio-microprocesador-mips-segmentado">Práctica de Laboratorio: Microprocesador MIPS Segmentado</h1>
+<ul>
+<li>Trabajo Práctico</li>
+<li>Arquitectura de Computadoras I</li>
+<li>Universidad Nacional de Tres de Febrero</li>
+</ul>
+<h2 id="integrantes">Integrantes</h2>
+<ul>
+<li>Chavez, Matias. Legajo N° 41902</li>
+<li>Lottero, Bruno. Legajo N° 18434</li>
+</ul>
+<h2 id="objetivo">Objetivo</h2>
+<blockquote>
+<p>El objetivo de esta práctica es ampliar a la implementación el microprocesador MIPS (visto en clase de teoría) en<br>
+VHDL. En concreto, se va a realizar la versión segmentada del microprocesador, cuyos detalles se<br>
+pueden encontrar en: "Computer Organization and Design: The Hardware/Software Interface ", por<br>
+David A.Patterson y John L. Hennessy.<br>
+El modelo de las memorias de datos y programas proporcionado (archivo memory.vhd) no introduce<br>
+ciclos de espera y responde en el mismo ciclo. Además, utiliza dos archivos separados para el<br>
+contenido inicial de cada memoria, archivo llamado “program1” para memoria de instrucciones y<br>
+“data” para memoria de datos. Se proporcionan un archivo de ejemplo (program1.s) para utilizar<br>
+junto con el testbench de la práctica, si bien se pueden generar otros archivos correspondientes a<br>
+otros códigos para hacer más pruebas.</p>
+</blockquote>
+<h2 id="ejercicio">Ejercicio</h2>
+<p>Se dispone de la implementación de un procesador completo que admite las siguientes<br>
+instrucciones: add, sub, and, or, lw, sw, slt y beq. En cualquier caso, la instrucción beq, que implica<br>
+riesgos de control por ser un salto, funcionará “anómalamente” en la versión básica del ejercicio<br>
+obligatorio.</p>
+<p>Se pide que al diseño completo del procesador MIPS segmentado realizado por la cátedra,<br>
+incorporar las siguientes instrucciones y verificar el diseño utilizando el archivo “program1”<br>
+proporcionado por la cátedra.</p>
+<h3 id="instrucciones-a-implementar">Instrucciones a implementar</h3>
+<p><img src="https://lh3.googleusercontent.com/EEGgcWAFb6WG8jKFm5pqYijzeNYiSg_oJNR5alGOhb7TpFOt_numsUS6EcLkER6Du4cxxUSb3a-9" alt="enter image description here"></p>
+<h2 id="resolución">Resolución</h2>
+<h3 id="agregado-de-inmediatos">Agregado de Inmediatos</h3>
+<p>Para el agregado de las instrucciones LUI, ADDI, AND y ORI, se realizaron cambios sobre</p>
+<ul>
+<li>processor.vhd
+<ul>
+<li>Se aumento la dimension de la señal de control de la ALU de 2 a 3 bits, para soportar los inmediatos nuevos.</li>
+</ul>
+</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl"><span class="token keyword">signal</span> ALUOp<span class="token punctuation">:</span> <span class="token function">std_logic_vector</span><span class="token punctuation">(</span><span class="token number">2</span> <span class="token keyword">downto</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>Se definieron en la etapa ID, las señales de control para las operaciones según fue necesario</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl">      <span class="token comment">--LUI--</span>
+      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"001111"</span> <span class="token operator">=</span><span class="token operator">&gt;</span>
+		ID_RegWrite<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span> 
+		ID_MemToReg<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemRead<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemWrite<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_Branch<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_RegDst<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_AluOp<span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"100"</span><span class="token punctuation">;</span> 
+		ID_ALUSrc<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span>
+      <span class="token comment">--ADDI--</span>
+      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"001000"</span> <span class="token operator">=</span><span class="token operator">&gt;</span>
+		ID_RegWrite<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span> 
+		ID_MemToReg<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemRead<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemWrite<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_Branch<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span>
+		ID_RegDst<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_AluOp<span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"101"</span><span class="token punctuation">;</span> 
+		ID_ALUSrc<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span>
+      <span class="token comment">--ANDI--</span>
+      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"001100"</span> <span class="token operator">=</span><span class="token operator">&gt;</span>
+		ID_RegWrite<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span> 
+		ID_MemToReg<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemRead<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemWrite<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_Branch<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_RegDst<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_AluOp<span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"110"</span><span class="token punctuation">;</span> 
+		ID_ALUSrc<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span>
+      <span class="token comment">--ORI--</span>
+      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"001101"</span> <span class="token operator">=</span><span class="token operator">&gt;</span>
+		ID_RegWrite<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span> 
+		ID_MemToReg<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemRead<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemWrite<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_Branch<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_RegDst<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_AluOp<span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"111"</span><span class="token punctuation">;</span> 
+		ID_ALUSrc<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span>
+      <span class="token comment">--J--</span>
+      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"000010"</span> <span class="token operator">=</span><span class="token operator">&gt;</span>
+		ID_RegWrite<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span> 
+		ID_MemToReg<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemRead<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_MemWrite<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_Branch<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_Jump <span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span>
+		ID_RegDst<span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span> 
+		ID_AluOp<span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"011"</span><span class="token punctuation">;</span> <span class="token comment">--alu va por others </span>
+		ID_ALUSrc<span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>Se definieron en la etapa EX los casos anteriores en la unidad de control para la ALU</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl">      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"100"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token comment">-- LUI</span>
+	  AluControl <span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"100"</span><span class="token punctuation">;</span>
+      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"101"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token comment">-- ADDI</span>
+	  AluControl <span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"010"</span><span class="token punctuation">;</span>
+      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"110"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token comment">-- ANDI</span>
+	  AluControl <span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"000"</span><span class="token punctuation">;</span>
+      <span class="token keyword">when</span> <span class="token vhdl-vectors number">"111"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token comment">-- ORI</span>
+	  AluControl <span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">"001"</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>alu.vhd
+<ul>
+<li>En la ALU se adecuó la operación para LUI y luego se redefinieron los valores del case en 3 bits</li>
+</ul>
+</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl"><span class="token keyword">process</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">,</span> control<span class="token punctuation">)</span>
+<span class="token keyword">begin</span>
+    <span class="token keyword">case</span> control <span class="token keyword">is</span>
+    <span class="token keyword">when</span> <span class="token vhdl-vectors number">"000"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> aux <span class="token operator">&lt;=</span> a <span class="token operator">and</span> b<span class="token punctuation">;</span>
+    <span class="token keyword">when</span> <span class="token vhdl-vectors number">"001"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> aux <span class="token operator">&lt;=</span> a <span class="token operator">or</span> b<span class="token punctuation">;</span>
+    <span class="token keyword">when</span> <span class="token vhdl-vectors number">"010"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> aux <span class="token operator">&lt;=</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span>
+    <span class="token keyword">when</span> <span class="token vhdl-vectors number">"110"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> aux <span class="token operator">&lt;=</span> a <span class="token operator">-</span> b<span class="token punctuation">;</span>
+    <span class="token keyword">when</span> <span class="token vhdl-vectors number">"111"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> 
+        <span class="token keyword">if</span><span class="token punctuation">(</span>a<span class="token operator">&lt;</span>b<span class="token punctuation">)</span> <span class="token keyword">then</span>
+        aux <span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">x"00000001"</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span> aux <span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">x"00000000"</span><span class="token punctuation">;</span>
+        <span class="token keyword">end</span> <span class="token keyword">if</span><span class="token punctuation">;</span>
+    <span class="token keyword">when</span> <span class="token vhdl-vectors number">"100"</span> <span class="token operator">=</span><span class="token operator">&gt;</span> aux <span class="token operator">&lt;=</span> <span class="token function">b</span><span class="token punctuation">(</span><span class="token number">15</span> <span class="token keyword">downto</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token vhdl-vectors number">x"0000"</span><span class="token punctuation">;</span>  
+    <span class="token keyword">when</span> <span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> aux <span class="token operator">&lt;=</span> <span class="token vhdl-vectors number">x"00000000"</span><span class="token punctuation">;</span>   
+    <span class="token keyword">end</span> <span class="token keyword">case</span><span class="token punctuation">;</span>  
+       
+<span class="token keyword">end</span> <span class="token keyword">process</span><span class="token punctuation">;</span>
+</code></pre>
+<h3 id="agregado-de-jump">Agregado de Jump</h3>
+<p>Para el agregado de la J, se realizaron cambios sobre processor.vhd</p>
+<ul>
+<li>En primer lugar se creo la señal de Jump y las señales que resguardan el cálculo del salto</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl"><span class="token comment">-- Control de mux jump</span>
+<span class="token keyword">signal</span> Jump<span class="token punctuation">:</span> std_logic<span class="token punctuation">;</span>
+
+ <span class="token comment">--ETAPA ID--</span>
+<span class="token keyword">signal</span> ID_Jump<span class="token punctuation">:</span> std_logic<span class="token punctuation">;</span>
+
+ <span class="token comment">--ETAPA EX--</span>
+<span class="token keyword">signal</span> EX_Jump<span class="token punctuation">:</span> std_logic<span class="token punctuation">;</span>
+<span class="token comment">-- Para direccion de salto en jump</span>
+<span class="token keyword">signal</span> EX_PC_Jump<span class="token punctuation">:</span> std_logic_vector <span class="token punctuation">(</span><span class="token number">31</span> <span class="token keyword">downto</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>En la etapa ID se agrega el seteo de la señal de control del jump en CONTROL_UNIT según corresponda</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl">ID_Jump <span class="token operator">&lt;=</span> <span class="token number">'1'</span><span class="token punctuation">;</span>
+</code></pre>
+<p>o</p>
+<pre class=" language-vhdl"><code class="prism  language-vhdl">ID_Jump <span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>Además se propaga la señal de control</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl">EX_Jump <span class="token operator">&lt;=</span> ID_Jump<span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>A continuación en la etapa EX, se realiza el cálculo del salto para el J y se propaga la señal</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl"><span class="token comment">-- Calculo dirección de salto (Jump)</span>
+EX_PC_Jump <span class="token operator">&lt;=</span> <span class="token function">EX_PC_4</span><span class="token punctuation">(</span><span class="token number">31</span> <span class="token keyword">downto</span> <span class="token number">28</span><span class="token punctuation">)</span><span class="token operator">&amp;</span><span class="token function">EX_immediate</span><span class="token punctuation">(</span><span class="token number">25</span> <span class="token keyword">downto</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token operator">&amp;</span><span class="token vhdl-vectors number">"00"</span><span class="token punctuation">;</span>
+<span class="token comment">-- Control de Jump</span>
+Jump <span class="token operator">&lt;=</span> EX_Jump<span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>Por ultimo, en la etapa IF, se aplica nueva lógica para decidir como cargar el PC según como se hayan cargado las señales antes mencionadas</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl">  next_PC <span class="token operator">&lt;=</span> MEM_PC_Branch <span class="token keyword">when</span> <span class="token punctuation">(</span>PcSrc <span class="token operator">=</span> <span class="token number">'1'</span><span class="token punctuation">)</span> <span class="token keyword">else</span>
+		EX_PC_jump <span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>PcSrc <span class="token operator">=</span> <span class="token number">'0'</span><span class="token punctuation">)</span> <span class="token operator">and</span> <span class="token punctuation">(</span>Jump <span class="token operator">=</span> <span class="token number">'1'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">else</span>
+		PC_4<span class="token punctuation">;</span>
+</code></pre>
+<p>Mediante esta lógica podemos tener una instrucción BEQ y a continuación una J en memoria de instrucciones y el funcionamiento va a ser el esperado (no se necesitan NOP)</p>
+<h2 id="flush-del-datapath-ante-saltos">Flush del datapath ante saltos</h2>
+<p>Para complementar lo visto en clase y por una cuestión de consistencia con la lógica anterior, optamos por agregar el flush de las etapas que corresponden.<br>
+El diseño de este procesador MIPS trabaja sin predicción de saltos, o tambien podriamos decir que realiza predicción no efectiva (se asume que el salto no es efectivo).<br>
+De esta manera, cuando realmente se efectua un salto, es necesario limpiar las etapas que contienen instrucciones mal cargadas.<br>
+Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a saber:</p>
+<ul>
+<li>
+<p>La existencia de un BEQ se conoce en la etapa ID sobre la señal ID_Branch y la misma se propaga hasta la etapa MEM en<br>
+la señal Branch, ya que recién en la etapa EX se confirma la efectividad del salto.<br>
+Luego, en caso positivo, se limpian los registros IF/ID-ID/EX-EX/MEM para poder cargar el PC correcto a donde apunta el salto.</p>
+</li>
+<li>
+<p>Luego para el caso del J, se conoce tambien en la etapa ID la señal ID_Jump, la misma se propaga hasta EX en<br>
+donde se carga finalmente la señal Jump. Luego al avanzar un ciclo, estando el J en etapa MEM, se deben limpiar los registros IF/ID-ID/EX-</p>
+</li>
+</ul>
+<pre class=" language-vhdl"><code class="prism  language-vhdl"><span class="token comment">-- REGISTRO DE SEGMENTACION IF/ID      </span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>PcSrc <span class="token operator">=</span> <span class="token number">'1'</span> <span class="token operator">or</span> Jump <span class="token operator">=</span> <span class="token number">'1'</span><span class="token punctuation">)</span> <span class="token keyword">then</span>
+        ID_PC_4 <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ID_Instruction <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        
+<span class="token comment">-- REGISTRO DE SEGMENTACION ID/EX</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span> PcSrc <span class="token operator">=</span> <span class="token number">'1'</span> <span class="token operator">or</span> Jump <span class="token operator">=</span> <span class="token number">'1'</span><span class="token punctuation">)</span> <span class="token keyword">then</span>
+        EX_data1_rd <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span><span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        EX_data2_rd <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span><span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        EX_RegWrite <span class="token operator">&lt;=</span> <span class="token number">'0'</span> <span class="token punctuation">;</span>
+        EX_MemToReg <span class="token operator">&lt;=</span> <span class="token number">'0'</span> <span class="token punctuation">;</span> 
+        EX_MemRead <span class="token operator">&lt;=</span>  <span class="token number">'0'</span> <span class="token punctuation">;</span>
+        EX_MemWrite <span class="token operator">&lt;=</span>  <span class="token number">'0'</span> <span class="token punctuation">;</span>
+        EX_Branch <span class="token operator">&lt;=</span>  <span class="token number">'0'</span> <span class="token punctuation">;</span>
+        EX_Jump <span class="token operator">&lt;=</span>  <span class="token number">'0'</span> <span class="token punctuation">;</span>
+        RegDst <span class="token operator">&lt;=</span>  <span class="token number">'0'</span> <span class="token punctuation">;</span>
+        ALUOp <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span><span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ALUSrc <span class="token operator">&lt;=</span> <span class="token number">'0'</span> <span class="token punctuation">;</span>
+        EX_immediate <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        EX_rt <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        EX_rd <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+ <span class="token comment">-- REGISTRO DE SEGMENTACION EX/MEM</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span> PcSrc <span class="token operator">=</span> <span class="token number">'1'</span><span class="token punctuation">)</span> <span class="token keyword">then</span>
+        MEM_RegWrite <span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span>
+        MEM_MemToReg <span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span>
+        MEM_MemRead <span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span>
+        MEM_MemWrite <span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span>
+	Branch <span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span>
+        MEM_Zero <span class="token operator">&lt;=</span> <span class="token number">'0'</span><span class="token punctuation">;</span>
+        MEM_AluResult <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        MEM_data2_rd <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        MEM_Instruction_RegDst <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	MEM_PC_Branch <span class="token operator">&lt;=</span> <span class="token punctuation">(</span><span class="token keyword">others</span> <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+``
+
+</code></pre>
+</div>
+</body>
+
+</html>

@@ -198,12 +198,12 @@ Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a sab
  
 ```vhdl
 -- REGISTRO DE SEGMENTACION IF/ID      
-      if (Branch = '1' or Jump = '1') then
+      if (PcSrc = '1' or Jump = '1') then
         ID_PC_4 <= (others => '0');
         ID_Instruction <= (others => '0');
         
 -- REGISTRO DE SEGMENTACION ID/EX
-      if (Branch = '1' or Jump = '1') then
+      if ( PcSrc = '1' or Jump = '1') then
         EX_data1_rd <= (others =>'0');
         EX_data2_rd <= (others =>'0');
         EX_RegWrite <= '0' ;
@@ -219,7 +219,7 @@ Para realizar esto, aplicamos una logica de reset en los cambios de etapa, a sab
         EX_rt <= (others => '0');
         EX_rd <= (others => '0');
  -- REGISTRO DE SEGMENTACION EX/MEM
-      if (Branch = '1') then
+      if ( PcSrc = '1') then
         MEM_RegWrite <= '0';
         MEM_MemToReg <= '0';
         MEM_MemRead <= '0';
